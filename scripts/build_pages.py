@@ -38,6 +38,39 @@ CT = ZoneInfo("America/Chicago")
 
 E = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
+# Date-only ISO stamps (YYYY-MM-DD, not timestamps): the footer's "Page generated <date>" and JSON-LD dateModified carry
+# the build date, so every page's bytes change on every daily build. For sitemap <lastmod> (and the IndexNow ping in
+# scripts/indexnow_ping.py, which uses the same pattern) a page only counts as modified when it changed beyond these.
+_STAMP = re.compile(r"(?<![0-9-])[0-9]{4}-[0-9]{2}-[0-9]{2}(?![0-9T:])")
+
+
+def unstamped(text):
+    return _STAMP.sub("YYYY-MM-DD", text)
+
+
+def old_lastmods(path=None):
+    """{url: lastmod} from the sitemap.xml currently on disk (empty if missing/unreadable)."""
+    try:
+        with open(path or os.path.join(ROOT, "sitemap.xml"), encoding="utf-8") as f:
+            sm = f.read()
+    except OSError:
+        return {}
+    return dict(re.findall(r"<loc>([^<]+)</loc><lastmod>([0-9]{4}-[0-9]{2}-[0-9]{2})</lastmod>", sm))
+
+
+def git_day(rel):
+    """Date (YYYY-MM-DD, US Central) of the last commit touching rel, or None (no git / uncommitted / untracked)."""
+    import subprocess
+    try:
+        if subprocess.run(["git", "-C", ROOT, "status", "--porcelain", "--", rel], capture_output=True, text=True,
+                          timeout=10).stdout.strip():
+            return None
+        ts = subprocess.run(["git", "-C", ROOT, "log", "-1", "--format=%ct", "--", rel], capture_output=True, text=True,
+                            timeout=10).stdout.strip()
+        return dt.datetime.fromtimestamp(int(ts), CT).date().isoformat() if ts else None
+    except Exception:
+        return None
+
 
 def load(name):
     with open(os.path.join(ROOT, "data", name), encoding="utf-8") as f:
@@ -239,6 +272,8 @@ def build(dry=False):
     gen_date = dt.datetime.now(CT).date().isoformat()   # US Central, like every date the pages show
     nav_items = []  # no coin pages (retired Oct 25, 2026)
     changed = []
+    modified = set()  # written files that changed beyond the build-date stamps (see unstamped())
+    prev_lm = old_lastmods()
     langs = i18n.all_langs()
 
     def write(rel, content):
@@ -256,6 +291,8 @@ def build(dry=False):
             with open(p, "w", encoding="utf-8") as f:
                 f.write(content)
             changed.append(rel)
+            if old is None or unstamped(old) != unstamped(content):
+                modified.add(rel)
 
     site_sm = []  # /agents/ + /trust/ + policy pages (scripts/site_pages.py)
     try:
@@ -331,12 +368,22 @@ def build(dry=False):
         return langs
 
     # ---- sitemap (every language, with xhtml:link hreflang alternates) ----
+    def keep_lm(p, lm):
+        """<lastmod> for page path p (URL path, '' = home): the computed lm when the page changed beyond its build-date
+        stamps in this build (or is new to the sitemap), else the lastmod it already had, so a rebuild that only moves
+        "Page generated <date>" doesn't claim a modification. The English homepage is finished after the sitemap, so it
+        always takes the computed lm (its live counts change daily)."""
+        url = SITE + p
+        if p == "" or url not in prev_lm or (p + "index.html") in modified:
+            return lm
+        return prev_lm[url]
+
     def url_el(p, lm, fq, pr):
         out = []
         for x in langs:
             alts = "".join(f'<xhtml:link rel="alternate" hreflang="{y.code}" href="{SITE}{y.prefix}{p}"/>' for y in langs) + \
                 (f'<xhtml:link rel="alternate" hreflang="x-default" href="{SITE}{p}"/>' if len(langs) > 1 else "")
-            out.append(f'  <url><loc>{SITE}{x.prefix}{p}</loc><lastmod>{lm}</lastmod><changefreq>{fq}</changefreq><priority>{pr}</priority>'
+            out.append(f'  <url><loc>{SITE}{x.prefix}{p}</loc><lastmod>{keep_lm(x.prefix + p, lm)}</lastmod><changefreq>{fq}</changefreq><priority>{pr}</priority>'
                        + (alts if len(langs) > 1 else "") + '</url>')
         return out
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -346,18 +393,20 @@ def build(dry=False):
         sm += url_el(p, lm, fq, pr)
     # English-only /pricing/, /about/ and /terms/ (scripts/info_pages.py; no language versions yet)
     for p, lm, fq, pr in info_sm:
-        sm.append(f'  <url><loc>{SITE}{p}</loc><lastmod>{lm}</lastmod><changefreq>{fq}</changefreq><priority>{pr}</priority></url>')
+        sm.append(f'  <url><loc>{SITE}{p}</loc><lastmod>{keep_lm(p, lm)}</lastmod><changefreq>{fq}</changefreq><priority>{pr}</priority></url>')
     # English-only static blog posts (blog/<slug>/index.html, hand-built; no language alternates)
     bdir = os.path.join(ROOT, "blog")
     if os.path.isfile(os.path.join(bdir, "index.html")):
-        sm.append(f'  <url><loc>{SITE}blog/</loc><lastmod>{gen_date}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>')
+        sm.append(f'  <url><loc>{SITE}blog/</loc><lastmod>{keep_lm("blog/", gen_date)}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>')
     if os.path.isdir(bdir):
         for d in sorted(os.listdir(bdir)):
             if os.path.exists(os.path.join(bdir, d, "index.html")):
-                sm.append(f'  <url><loc>{SITE}blog/{d}/</loc><lastmod>{gen_date}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>')
+                # hand-built posts (not rewritten by this build unless the beacon changes): the last commit touching the file
+                blm = (git_day(f"blog/{d}/index.html") if f"blog/{d}/index.html" not in modified else None) or keep_lm(f"blog/{d}/", gen_date)
+                sm.append(f'  <url><loc>{SITE}blog/{d}/</loc><lastmod>{blm}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>')
     # English-only seller pages (scripts/seller_pages.py); noindex ones (no paid test-buy or attempt yet) stay out
     for p, lm, fq, pr in seller_sm:
-        sm.append(f'  <url><loc>{SITE}{p}</loc><lastmod>{lm}</lastmod><changefreq>{fq}</changefreq><priority>{pr}</priority></url>')
+        sm.append(f'  <url><loc>{SITE}{p}</loc><lastmod>{keep_lm(p, lm)}</lastmod><changefreq>{fq}</changefreq><priority>{pr}</priority></url>')
     write("sitemap.xml", "\n".join(sm + ["</urlset>", ""]))
 
     # ---- Atom feed /feed.xml (scripts/feed.py): published blog posts only ----

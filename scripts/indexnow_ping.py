@@ -69,11 +69,36 @@ def path_to_url(path):
     return f"{BASE}/{path}"
 
 
+# Date-only ISO stamps (same pattern as build_pages.unstamped): every daily build rewrites "Page generated <date>" and
+# JSON-LD dateModified on every page, so a file diff alone would ping all ~80 URLs every day. Only pages that changed
+# beyond those stamps are submitted (IndexNow asks for changed content only).
+_STAMP = re.compile(r"(?<![0-9-])[0-9]{4}-[0-9]{2}-[0-9]{2}(?![0-9T:])")
+
+
+def unstamped(text):
+    return _STAMP.sub("YYYY-MM-DD", text)
+
+
+def _blob(commit, path):
+    r = subprocess.run(["git", "-C", ROOT, "show", f"{commit}:{path}"], capture_output=True)
+    return r.stdout.decode("utf-8", "replace") if r.returncode == 0 else None
+
+
 def changed_urls(commit, allowed):
     files = subprocess.run(["git", "-C", ROOT, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", commit],
                            capture_output=True, text=True, check=True).stdout.split()
     allowed_set = set(allowed)
-    return [u for u in dict.fromkeys(path_to_url(f) for f in files) if u in allowed_set]
+    out = []
+    for f in dict.fromkeys(files):
+        u = path_to_url(f)
+        if u not in allowed_set or u in out:
+            continue
+        if f.endswith(".html"):
+            old, new = _blob(f"{commit}^", f), _blob(commit, f)
+            if old is not None and new is not None and unstamped(old) == unstamped(new):
+                continue  # only the build-date stamps moved
+        out.append(u)
+    return out
 
 
 def submit(urls, key, timeout=20):
