@@ -77,5 +77,55 @@ class SitemapLastmod(unittest.TestCase):
                 self.assertEqual(m.group(1), day)
 
 
+class JsonLdDateModified(unittest.TestCase):
+    """build_pages: JSON-LD dateModified only moves when a page changed beyond its build-date stamps (P1, 2026-11-04)."""
+    OLD = ('<script type="application/ld+json">[{"@type": "Article", "dateModified": "2026-11-01"}]</script>'
+           '<p>12 checks</p><p class="meta">Page generated 2026-11-03</p>')
+
+    def test_stamp_only_change_keeps_sitemap_date(self):
+        import build_pages as bp
+        new = self.OLD.replace("2026-11-01", "2026-11-04").replace("2026-11-03", "2026-11-04")
+        out = bp.stable_ld_dates("how-it-works/index.html", self.OLD, new, {"https://lumitrades.io/how-it-works/": "2026-10-30"})
+        self.assertIn('"dateModified": "2026-10-30"', out)       # agrees with the sitemap lastmod
+        self.assertIn("Page generated 2026-11-04", out)          # the visible footer is untouched
+        self.assertEqual(bp.unstamped(out), bp.unstamped(new))
+
+    def test_stamp_only_change_without_sitemap_keeps_old(self):
+        import build_pages as bp
+        new = self.OLD.replace("2026-11-01", "2026-11-04").replace("2026-11-03", "2026-11-04")
+        out = bp.stable_ld_dates("sellers/x/index.html", self.OLD, new, {})
+        self.assertIn('"dateModified": "2026-11-01"', out)
+
+    def test_real_change_and_new_page_take_build_date(self):
+        import build_pages as bp
+        new = self.OLD.replace("2026-11-01", "2026-11-04").replace("12 checks", "13 checks")
+        lm = {"https://lumitrades.io/how-it-works/": "2026-10-30"}
+        self.assertEqual(bp.stable_ld_dates("how-it-works/index.html", self.OLD, new, lm), new)
+        self.assertEqual(bp.stable_ld_dates("how-it-works/index.html", None, new, lm), new)
+        self.assertEqual(bp.stable_ld_dates("sitemap.xml", self.OLD, new.replace("13", "12"), lm), new.replace("13", "12"))
+
+    def test_fixed_dates_and_timestamps_untouched(self):
+        import build_pages as bp
+        old = '{"dateModified": "2026-10-25"} {"dateModified": "2026-11-03T11:01:10.002Z"} 2026-11-03'
+        new = '{"dateModified": "2026-10-25"} {"dateModified": "2026-11-03T11:01:10.002Z"} 2026-11-04'
+        self.assertEqual(bp.keep_date_modified(old, new, "2026-10-01"), new)
+
+    def test_page_url(self):
+        import build_pages as bp
+        self.assertEqual(bp.page_url("index.html"), "https://lumitrades.io/")
+        self.assertEqual(bp.page_url("es/how-it-works/index.html"), "https://lumitrades.io/es/how-it-works/")
+        self.assertEqual(bp.page_url("sellers/xrplhub-io/index.html"), "https://lumitrades.io/sellers/xrplhub-io/")
+
+    def test_committed_how_page_rebuild(self):
+        """Tomorrow's rebuild of the committed /how-it-works/ (stamps moved only) keeps its sitemap date in JSON-LD."""
+        import build_pages as bp, re as _re
+        with open(os.path.join(ip.ROOT, "how-it-works", "index.html"), encoding="utf-8") as f:
+            old = f.read()
+        new = bp._STAMP.sub("2099-01-01", old)
+        lm = bp.old_lastmods(os.path.join(ip.ROOT, "sitemap.xml"))
+        out = bp.stable_ld_dates("how-it-works/index.html", old, new, lm)
+        self.assertEqual(_re.findall(r'"dateModified": "([0-9-]{10})"', out), [lm["https://lumitrades.io/how-it-works/"]])
+
+
 if __name__ == "__main__":
     unittest.main()

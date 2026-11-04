@@ -38,9 +38,10 @@ CT = ZoneInfo("America/Chicago")
 
 E = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
-# Date-only ISO stamps (YYYY-MM-DD, not timestamps): the footer's "Page generated <date>" and JSON-LD dateModified carry
-# the build date, so every page's bytes change on every daily build. For sitemap <lastmod> (and the IndexNow ping in
-# scripts/indexnow_ping.py, which uses the same pattern) a page only counts as modified when it changed beyond these.
+# Date-only ISO stamps (YYYY-MM-DD, not timestamps): the footer's "Page generated <date>" (and, before keep_date_modified,
+# JSON-LD dateModified) carry the build date, so every page's bytes change on every daily build. For sitemap <lastmod>,
+# JSON-LD dateModified (keep_date_modified) and the IndexNow ping in scripts/indexnow_ping.py (same pattern) a page only
+# counts as modified when it changed beyond these.
 _STAMP = re.compile(r"(?<![0-9-])[0-9]{4}-[0-9]{2}-[0-9]{2}(?![0-9T:])")
 
 
@@ -56,6 +57,42 @@ def old_lastmods(path=None):
     except OSError:
         return {}
     return dict(re.findall(r"<loc>([^<]+)</loc><lastmod>([0-9]{4}-[0-9]{2}-[0-9]{2})</lastmod>", sm))
+
+
+# JSON-LD dateModified as json.dumps writes it, date-only values (timestamps such as the trust Dataset's API generated_at
+# are data, not build stamps, and are left alone).
+_LD_DATE_MOD = re.compile(r'("dateModified": ")([0-9]{4}-[0-9]{2}-[0-9]{2})(")')
+
+
+def keep_date_modified(old, new, lastmod=None):
+    """new page text whose date-only JSON-LD dateModified values don't move when the page only changed in its date stamps
+    (the caller checks unstamped(old) == unstamped(new)). A value that moved is set back to the page's sitemap <lastmod>
+    (the same unstamped-change date, so the two agree per URL) or, for pages not in the sitemap, to the old value. Values
+    that didn't move (fixed policy dates, a seller's unchanged last-checked day) are kept as they are."""
+    olds = [m.group(2) for m in _LD_DATE_MOD.finditer(old)]
+    news = list(_LD_DATE_MOD.finditer(new))
+    if not news or len(olds) != len(news):
+        return new
+    it = iter(olds)
+
+    def sub(m):
+        o = next(it)
+        return m.group(0) if m.group(2) == o else m.group(1) + (lastmod or o) + m.group(3)
+    return _LD_DATE_MOD.sub(sub, new)
+
+
+def stable_ld_dates(rel, old, new, prev_lm):
+    """The text build() writes for rel: when an existing HTML page changed only in its date stamps, its JSON-LD dateModified
+    stays at the real change date (prev_lm: {url: lastmod} from the old sitemap). Pages that really changed, new pages and
+    non-HTML files are returned as rendered (dateModified = the generator's date, which is also the sitemap's lastmod)."""
+    if rel.endswith(".html") and old is not None and old != new and unstamped(old) == unstamped(new):
+        return keep_date_modified(old, new, prev_lm.get(page_url(rel)))
+    return new
+
+
+def page_url(rel):
+    """Public URL of a generated HTML file (rel path like 'es/trust/index.html')."""
+    return SITE + (rel[:-len("index.html")] if rel.endswith("index.html") else rel)
 
 
 def git_day(rel):
@@ -286,6 +323,7 @@ def build(dry=False):
         if os.path.exists(p):
             with open(p, encoding="utf-8") as f:
                 old = f.read()
+        content = stable_ld_dates(rel, old, content, prev_lm)
         if old != content:
             os.makedirs(os.path.dirname(p), exist_ok=True)
             with open(p, "w", encoding="utf-8") as f:
