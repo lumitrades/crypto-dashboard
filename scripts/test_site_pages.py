@@ -366,16 +366,20 @@ class NoOldExchangeInStaticHtml(unittest.TestCase):
 
 class TrustBadge(unittest.TestCase):
     """/trust/ "Tested by Lumi" badge: only from a real paid test-buy, never invented, same in all 6 languages."""
-    class H:
-        E = staticmethod(lambda s: __import__("html").escape(str(s)))
-        _ = staticmethod(lambda s, **kw: s.format(**kw) if kw else s)
+    @classmethod
+    def setUpClass(cls):
+        import html, types, i18n
+        cls.H = types.SimpleNamespace(E=lambda s: html.escape(str(s)),
+                                      _=lambda s, **kw: s.format(**kw) if kw else s,
+                                      L=i18n.Lang("en"))
 
     def test_delivered(self):
         v = {"last_paid_observation": {"observed_at": "2026-10-24T09:21:21.000Z", "network": "xrpl:0", "delivery": "delivered", "data_returned": True}}
         b = sp.badge_html(self.H, v)
         self.assertIn("b-delivered", b)
         self.assertIn(">Last test-buy<", b)
-        self.assertIn(">delivered · 10-24-2026 · XRPL<", b)
+        self.assertIn(">delivered · Oct 24, 2026 · XRPL<", b)
+        self.assertNotIn("10-24-2026", b)
         self.assertNotIn(">Tested by Lumi<", b)  # one delivered buy is not the badge
 
     def test_earned_only_from_badge_verdict(self):
@@ -402,21 +406,42 @@ class TrustBadge(unittest.TestCase):
             v = {"last_paid_observation": {"observed_at": "2026-10-23T04:12:22Z", "network": net, "delivery": "not_delivered", "data_returned": False}}
             b = sp.badge_html(self.H, v)
             self.assertIn("b-no_delivery", b)
-            self.assertIn(f">not delivered · 10-23-2026 · {ch}<", b)
+            self.assertIn(f">not delivered · Oct 23, 2026 · {ch}<", b)
+            self.assertNotIn("10-23-2026", b)
 
     def test_never_tested_or_unknown(self):
         self.assertEqual(sp.badge_html(self.H, {}), "")
         self.assertEqual(sp.badge_html(self.H, {"last_paid_observation": None}), "")
         self.assertEqual(sp.badge_html(self.H, {"last_paid_observation": {"delivery": "delivered"}}), "")  # no date: no badge
         b = sp.badge_html(self.H, {"last_paid_observation": {"observed_at": "2026-10-24T01:00:00Z", "network": "solana:x", "delivery": "delivered"}})
-        self.assertIn(">delivered · 10-24-2026<", b)  # unknown chain is left out, not guessed
+        self.assertIn(">delivered · Oct 24, 2026<", b)  # unknown chain is left out, not guessed
+        self.assertNotIn("10-24-2026", b)
 
     def test_no_scam_or_pnl_wording(self):
         txt = " ".join([sp.BADGE_NOTE, sp.BADGE_KEY, sp.BADGE_TIP_END, *sp.BADGE_TIP.values(), *sp.BADGE_RES.values()]).lower()
         for w in ("scam", "fraud", "p&l", "profit", "track record"):
             self.assertNotIn(w, txt)
 
+    def test_pill_date_matches_site_format(self):
+        """Pill dates use Lang.date (Nov 5, 2026), not MM-DD-YYYY; other languages localize the month."""
+        import types, html, i18n
+        v = {"last_paid_observation": {"observed_at": "2026-11-05T12:00:00Z", "network": "xrpl:0", "delivery": "delivered"}}
+        en = sp.badge_html(self.H, v)
+        self.assertIn(">delivered · Nov 5, 2026 · XRPL<", en)
+        self.assertNotIn("11-05-2026", en)
+        self.assertEqual(sp.badge_date("2026-11-05T12:00:00Z", self.H.L), "Nov 5, 2026")
+        self.assertEqual(sp.badge_date("", self.H.L), "")
+        self.assertEqual(sp.badge_date(None, self.H.L), "")
+        es_h = types.SimpleNamespace(E=lambda s: html.escape(str(s)), _=lambda s, **kw: s.format(**kw) if kw else s, L=i18n.Lang("es"))
+        es = sp.last_buy_html(es_h, v)
+        self.assertIn("5 nov 2026", es)
+        self.assertNotIn("11-05-2026", es)
+        ja_h = types.SimpleNamespace(E=lambda s: html.escape(str(s)), _=lambda s, **kw: s.format(**kw) if kw else s, L=i18n.Lang("ja"))
+        ja = sp.last_buy_html(ja_h, v)
+        self.assertIn("2026年11月5日", ja)
+
     def test_translated(self):
+
         keys = [sp.BADGE_NOTE, sp.BADGE_KEY, sp.BADGE_TIP_END, "Tested by Lumi", sp.BADGE_EARNED_TXT, sp.BADGE_EARNED_TIP, sp.LAST_LABEL,
                 sp.NOT_SCORED, *sp.BADGE_TIP.values(), *sp.BADGE_RES.values()]
         for lang in LANGS:
