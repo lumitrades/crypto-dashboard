@@ -30,7 +30,7 @@
   // Mirrors earned_html() / last_buy_html() in scripts/site_pages.py. "Tested by Lumi" shows ONLY when the badge is earned
   // (score >= 80, at least 3 paid test-buys, latest test-buy delivered): the feed's badge field if present, else the build's
   // copy of GET /v1/badge/{id}.json (#tr-badge). A separate "Last test-buy" pill describes one buy: result · UTC date
-  // (MM-DD-YYYY) · chain. No paid test-buy on record = no pill.
+  // (localized short form, e.g. Nov 5, 2026) · chain. No paid test-buy on record = no pill.
   function chainName(n) {
     n = String(n || "").toLowerCase();
     if (n.indexOf("xrpl") === 0) return "XRPL";
@@ -53,14 +53,23 @@
     return `<span class="lt-badge ${cls}" role="img" aria-label="${esc(label)}: ${esc(right)}" title="${esc(tip)}">` +
       `<span class="lt-b-l" aria-hidden="true">${esc(label)}</span><span class="lt-b-r" aria-hidden="true">${esc(right)}</span></span>`;
   }
+  function pillDate(iso) {
+    // UTC calendar day of the ISO prefix, formatted like the rest of the site (Nov 5, 2026 / localized).
+    const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return "";
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    const loc = I.locale || document.documentElement.lang || "en-US";
+    try { return d.toLocaleDateString(loc, { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" }); }
+    catch (e) { return m[1] + "-" + m[2] + "-" + m[3]; }
+  }
   function lastBuy(o) {
     if (!o || !o.observed_at) return "";
-    const m = String(o.observed_at).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (!m) return "";
+    const day = pillDate(o.observed_at);
+    if (!day) return "";
     const res = o.delivery === "delivered" ? "delivered"
       : (o.delivery === "not_delivered" || o.delivery === "failed" || o.data_returned === false) ? "no_delivery" : "inconclusive";
     const ch = chainName(o.network);
-    const right = [tr(RES[res]), m[2] + "-" + m[3] + "-" + m[1]].concat(ch ? [ch] : []).join(" · ");
+    const right = [tr(RES[res]), day].concat(ch ? [ch] : []).join(" · ");
     return pill("lt-last b-" + res, tr("Last test-buy"), right, tr(TIP[res]) + " " + tr("Date in UTC. A dated test result, not an endorsement or guarantee."));
   }
   function badge(v, o) {

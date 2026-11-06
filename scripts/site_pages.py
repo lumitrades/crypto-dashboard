@@ -286,7 +286,7 @@ def vendor_link(v):
 #    test-buy delivered. Source: the vendor feed's `badge` field when it has one, else GET /v1/badge/{id}.json (`earned`),
 #    fetched once per build and cached in state/trust_badges.json. Anything else (missing, error, unknown) = not earned.
 # 2. "Last test-buy: delivered / not delivered / inconclusive" describes one buy (last_paid_observation): result, UTC date
-#    (MM-DD-YYYY) and chain. No paid test-buy on record = no pill. Display only: neither changes a score.
+#    (localized short form via Lang.date, e.g. Nov 5, 2026) and chain. No paid test-buy on record = no pill. Display only: neither changes a score.
 # Mirrored in assets/trust.js (badge(), lastBuy()).
 BADGE_URL = API + "/v1/badge/{id}.json"
 BADGE_CACHE = os.path.join(ROOT, "state", "trust_badges.json")
@@ -317,9 +317,14 @@ def badge_result(o):
     return "inconclusive"
 
 
-def badge_date(iso):
+def badge_date(iso, L):
+    """Localized short date for the UTC calendar day of iso (e.g. 'Nov 5, 2026'), or '' when unparseable.
+    Uses the page language's Lang.date so es/pt/tr/ko/ja get localized months; day is the ISO prefix, not a local TZ shift."""
     m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", str(iso or ""))
-    return f"{m.group(2)}-{m.group(3)}-{m.group(1)}" if m else ""
+    if not m:
+        return ""
+    t = dt.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    return L.date(t, with_time=False)
 
 
 def _earned_flag(b):
@@ -407,11 +412,11 @@ def earned_html(h, v):
 
 
 def last_buy_html(h, v):
-    """'Last test-buy: delivered · MM-DD-YYYY · chain', or "" when Lumi has no real completed paid test-buy."""
+    """'Last test-buy: delivered · Nov 5, 2026 · chain' (localized), or "" when Lumi has no real completed paid test-buy."""
     E, _t = h.E, h._
     o = v.get("last_paid_observation") or None
     res = badge_result(o)
-    day = badge_date(o.get("observed_at")) if res else ""
+    day = badge_date(o.get("observed_at"), h.L) if res else ""
     if not res or not day:
         return ""
     chain = badge_chain(o.get("network"))
