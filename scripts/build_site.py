@@ -12,7 +12,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "_site")
 LANGS = ("es", "pt", "ja", "ko", "tr")
 ROOT_FILES = (".nojekyll", "CNAME", "BingSiteAuth.xml", "a65be5c5e8044d1d7844e6c68287e837.txt", "favicon.ico",
-              "feed.xml", "index.html", "llms.txt", "robots.txt", "site.webmanifest", "sitemap.xml")
+              "feed.xml", "index.html", "llms.txt", "robots.txt", "site.webmanifest", "sitemap.xml", "skill.md")
 WELL_KNOWN = ("security.txt", "x402", "x402.json", "trustline-merchant.txt", "xrp-ledger.toml", "agent-registration.json")
 PAGE_DIRS = ("about", "agents", "blog", "contact", "how-it-works", "preview", "prices", "pricing", "privacy", "sellers", "terms",
              "top-sellers", "trust", "trust-policy")
@@ -49,6 +49,10 @@ def build():
         p = os.path.join(ROOT, ".well-known", f)
         if os.path.exists(p):
             shutil.copy2(p, os.path.join(OUT, ".well-known", f))
+    agent_skills = os.path.join(ROOT, ".well-known", "agent-skills", "index.json")
+    if os.path.exists(agent_skills):
+        os.makedirs(os.path.join(OUT, ".well-known", "agent-skills"), exist_ok=True)
+        shutil.copy2(agent_skills, os.path.join(OUT, ".well-known", "agent-skills", "index.json"))
     for d in SHARED_DIRS + PAGE_DIRS:
         if os.path.isdir(os.path.join(ROOT, d)):
             _copy_tree(os.path.join(ROOT, d), os.path.join(OUT, d))

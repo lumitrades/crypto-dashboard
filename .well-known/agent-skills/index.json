@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "check-x402-seller-before-paying",
+      "type": "skill-md",
+      "description": "Before paying an x402 seller, call Lumi's free check and read its one-line summary: test-buys, delivered, last check date. Lumi never says a seller is safe.",
+      "url": "/skill.md",
+      "digest": "sha256:3706c9f6ee32dbce176827264d53068f7c85c634fdc8a2bcaa3a45425b0f7bbf"
+    }
+  ]
+}
