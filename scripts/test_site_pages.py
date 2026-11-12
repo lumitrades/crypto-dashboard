@@ -732,7 +732,7 @@ class InfoPages(unittest.TestCase):
                    "US$100", "OFAC", "Governing law", "principally resides and conducts business",
                    "must be sent by email to", "and are effective when received",
                    "Our postal address, provided as required by law, is:", 'href="mailto:legal@lumitrades.io"',
-                   "Trust Data Licence, version 2026-10-22"):
+                   "Trust Data Licence, version 2026-11-11", "No indemnities", "30-day data-feed plans do not auto-renew", "A current platform licence is required"):
             self.assertIn(s_, t)
         self.assertNotEqual(info_pages.NOTICE_ADDRESS, info_pages.NOTICE_PLACEHOLDER)
         # D14 open: no refund/retry remedy paragraph until the refund/credit flow exists.

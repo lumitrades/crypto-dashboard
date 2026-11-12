@@ -87,6 +87,7 @@ FEED_PLANS = [
     ("Feed credits", ("{p} per 1,000 lookups", "$1.50"), "Prepaid lookups on top of the free 1,000 a month; credits never expire"),
     ("Feed", ("{p} per 30 days", "$99"), "100,000 bulk lookups, delta feed, full evidence and receipts"),
     ("Feed Pro", ("{p} per 30 days", "$199"), "500,000 lookups, delta feed, licensed full snapshot export, status-change webhooks, receipts"),
+    ("Platform licence", ("from {p} per 30 days", "$499"), "Redistribution inside the named product(s) written down at purchase; contact hello@lumitrades.io. Not sold over x402. Availability figures are a non-binding target, not a credit-bearing SLA"),
 ]
 PLANS = MONITOR_PLANS + FEED_PLANS
 
@@ -715,7 +716,7 @@ def agents_page(h, tp, nav_items, V, gen_date, vendors_doc=None):
 <section class="card cp-sec" id="feed"><h2>{E(_t("Trust data feed and license"))}</h2>
 <p>{_t("Keyed, licensed access to Lumi's trust observations for facilitators, wallets and agent frameworks: bulk lookups of up to 50 URLs or payTo addresses per request, a status-change feed and, on Feed Pro, a full snapshot export.")}</p>
 {ptable(FEED_PLANS)}
-<p class="meta">{_t("License: no resale or redistribution of the raw data, attribution required, no warranty. Prepaid credits never expire. 30-day plans, no auto-renew.")} {lk(API + "/v1/feed/license", _t("License terms"))} · {lk(API + "/v1/feed", _t("Feed docs"))}</p></section>
+<p class="meta">{_t("License: a current platform licence is required to redistribute Licensed Fields inside your product; Feed and Feed Pro are for your own use. Marked vet402 and x402-list fields stay under CC BY 4.0. Attribution required, no warranty. Prepaid credits never expire. 30-day plans, no auto-renew.")} {lk(API + "/v1/feed/license", _t("License terms"))} · {lk(API + "/v1/feed", _t("Feed docs"))}</p></section>
 <section class="card cp-sec" id="prices"><h2>{E(_t("Prices and free trial"))}</h2>
 <p>{_t(AGENTS_ROUTES_TEXT, **route_counts())}</p>
 <p class="meta">{_t("Prices per call in USD. If the data isn't fresh the API answers 503 and you are not charged. Free: <code>/openapi.json</code>, <code>/skill.md</code>, <code>/.well-known/x402</code>.")}</p></section>

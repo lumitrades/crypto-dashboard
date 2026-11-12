@@ -22,10 +22,10 @@ NOTICE_PLACEHOLDER = "[NOTICE ADDRESS: to supply]"
 # Business mailbox (supplied Oct 25, 2026). Operator name "Lumi Trades" only (no LLC/Inc.). Not translated.
 NOTICE_ADDRESS = "Lumi Trades, 6311 Ames Ave #1056, Omaha, NE 68104, United States"
 LEGAL_EMAIL = "legal@lumitrades.io"
-TERMS_UPDATED = "Oct 26, 2026"   # first published version
-TERMS_VERSION = 1
+TERMS_UPDATED = "Nov 11, 2026"   # v2: licence 2026-11-11, mutual no-indemnity (draft, not published)
+TERMS_VERSION = 2
 FEED_LICENCE = "https://api.lumitrades.io/v1/feed/license"
-FEED_LICENCE_NAME = "Trust Data Licence, version 2026-10-22"   # Legal N5: "licence" everywhere in site copy
+FEED_LICENCE_NAME = "Trust Data Licence, version 2026-11-11"   # Legal N5: "licence" everywhere in site copy
 
 
 def check_placeholders():
@@ -79,7 +79,7 @@ def pricing_page(h, tp, nav_items, V, gen_date):
 <p><b>Sellers:</b> prove you control your payTo wallet, then Lumi test-buys your endpoints and alerts you when something breaks. Watch <b class="mono">$5</b> or Watch Pro <b class="mono">$20</b> per endpoint per 30 days, with a free tier and a free 14-day Watch trial; Re-test pack <b class="mono">$6.50</b> (30 test-buys) or Founder pack <b class="mono">$5.00</b> (24 test-buys, first 10 sellers); Audit <b class="mono">$99</b> one-time. A paid plan is disclosed on the seller's public entry and never changes its label. No auto-renew; no refunds unless Lumi can't perform the monitoring. {lk("https://api.lumitrades.io/v1/monitor", "How to start →")}</p>
 {ptable(sp.MONITOR_PLANS)}</section>
 <section class="card cp-sec" id="feed"><h2>Trust data feed</h2>
-<p><b>Trust data feed</b> for facilitators, wallets and agent frameworks: a free key with 1,000 lookups a month, then <b class="mono">$1.50</b> per 1,000 (prepaid credits never expire), or Feed <b class="mono">$99</b> and Feed Pro <b class="mono">$199</b> per 30 days. No resale of raw data, attribution required, no warranty. Use is governed by the {lk(FEED_LICENCE, FEED_LICENCE_NAME)}.</p>
+<p><b>Trust data feed</b> for facilitators, wallets and agent frameworks: a free key with 1,000 lookups a month, then <b class="mono">$1.50</b> per 1,000 (prepaid credits never expire), or Feed <b class="mono">$99</b> and Feed Pro <b class="mono">$199</b> per 30 days, or a platform licence quoted from <b class="mono">$499</b> per 30 days (contact hello@lumitrades.io; not sold over x402). 30-day plans do not auto-renew. Attribution required, no warranty. A current platform licence is required to redistribute Licensed Fields inside your product. Use is governed by the {lk(FEED_LICENCE, FEED_LICENCE_NAME)}.</p>
 {ptable(sp.FEED_PLANS)}</section>
 <section class="card cp-sec" id="pay"><h2>How to pay</h2>
 <p>Pay per call with x402, no account or key: <b>USDC on Base</b>, <b>XRP, RLUSD or USDC on the XRP Ledger</b> or <b>USDC on Stellar</b>. MCP server: <code>https://api.lumitrades.io/mcp</code>. Docs: {lk("https://api.lumitrades.io/", "api.lumitrades.io")} · <a href="../agents/">The 402 flow and MCP setup →</a></p>
@@ -202,9 +202,9 @@ def terms_page(h, tp, nav_items, V, gen_date):
 <p>Nothing on the site or returned by the API is financial, investment, legal or tax advice, or an offer or solicitation to buy or sell anything. Lumi Trades isn't a registered investment adviser or commodity trading adviser and doesn't give personalized advice: what it publishes is general and impersonal and isn't tailored to anyone. Lumi Trades is not a broker, an exchange or a wallet and never holds your funds.</p></section>
 <section class="card cp-sec" id="payments"><h2>4. Payments</h2>
 <p>Paid calls are priced in the API's 402 quote and paid with x402 on the networks listed on the <a href="../pricing/">pricing page</a>. Prices can change; the price that applies is the one in the 402 quote when you pay, and promotional or founder prices may apply as quoted. On-chain payments can't be reversed by you or by us, so there are no chargebacks. If the data isn't fresh, the API answers 503 <b>before</b> any payment is taken.</p>
-<p>Per-call fees are not refundable. Seller monitoring plans and audits are refundable only as stated on the <a href="../pricing/">pricing page</a> (when Lumi can't perform the monitoring), and data-feed plans and credits as stated in the {lic} (the unprovided part is refunded). Refunds are paid on-chain to the wallet that paid, in the same asset where possible.</p></section>
+<p>Per-call fees are not refundable. Seller monitoring plans and audits are refundable only as stated on the <a href="../pricing/">pricing page</a> (when Lumi can't perform the monitoring), and data-feed plans and credits as stated in the {lic} (the unprovided part is refunded). 30-day data-feed plans do not auto-renew; renewing means paying again. Refunds are paid on-chain to the wallet that paid, in the same asset where possible.</p></section>
 <section class="card cp-sec" id="use"><h2>5. Acceptable use</h2>
-<p>Don't use the service to break the law, to overload or attack it, to get around payment or rate limits, to misrepresent Lumi's results, or to scrape, bulk-download or systematically extract the trust list, reports or API results (beyond normal use of the free endpoints and the limits in the feed licence), to resell, sublicense or republish them as a dataset, feed or competing service, or to create multiple wallets or keys to get around free-tier limits. Showing individual results with attribution ("Trust data: Lumi (lumitrades.io)") is fine. Data-feed use is also governed by the {lic}. We may block traffic that breaks these terms.</p></section>
+<p>Don't use the service to break the law, to overload or attack it, to get around payment or rate limits, to misrepresent Lumi's results, or to scrape, bulk-download or systematically extract the trust list, reports or API results (beyond normal use of the free endpoints and the limits in the feed licence), to resell, sublicense or republish them as a dataset, feed or competing service, or to create multiple wallets or keys to get around free-tier limits. Showing individual results with attribution ("Trust data: Lumi (lumitrades.io)") is fine. A current platform licence is required to redistribute Licensed Fields inside your product, as that licence states. Data-feed use is also governed by the {lic}. We may block traffic that breaks these terms.</p></section>
 <section class="card cp-sec" id="privacy"><h2>6. Privacy</h2>
 <p>What the service collects and how long it keeps it is described in the <a href="../privacy/">Privacy Policy</a>.</p></section>
 <section class="card cp-sec" id="liability"><h2>7. Limitation of liability</h2>
@@ -216,10 +216,10 @@ def terms_page(h, tp, nav_items, V, gen_date):
 <p>Much of the service, including test-buys, labels and replies, is produced by Lumi, an AI agent, under human oversight. AI output can be wrong or incomplete; check anything important yourself.</p></section>
 <section class="card cp-sec" id="sellers"><h2>10. Sellers: corrections and reply</h2>
 <p>If you run a seller endpoint on the trust list, you can ask for a re-test at any time, add a reply shown next to your findings (see <a href="../trust/#reply">Right to reply</a>), or ask us to correct a factual error by emailing {mail} with the endpoint and what's wrong. We aim to respond within 5 business days; if a re-test or our records show we got something wrong, we correct it and note the correction with its date. We may remove replies that are unlawful, abusive, or contain personal data or malware links. Asking not to be tested is handled as described in the <a href="../trust-policy/">conflicts policy</a>.</p></section>
-<section class="card cp-sec" id="indemnity"><h2>11. Indemnity</h2>
-<p>If you use the service in breach of these terms or the law (for example by reselling data, or misrepresenting Lumi's results), you will cover the reasonable costs Lumi Trades incurs because of it, including reasonable legal fees.</p></section>
+<section class="card cp-sec" id="indemnity"><h2>11. No indemnities</h2>
+<p>Neither party will defend, indemnify or hold harmless the other party, or any third party, under these terms. Each party remains responsible under applicable law for its own acts and omissions. This does not limit either party's right to recover damages for the other party's breach, subject to section 7.</p></section>
 <section class="card cp-sec" id="termination"><h2>12. Suspension and termination</h2>
-<p>We may suspend or end access for any breach, abuse or legal requirement. You can stop at any time. Sections 2, 3, 7 and this section survive. Ending access doesn't remove refunds owed under section 4.</p></section>
+<p>We may suspend or end access for any breach, abuse or legal requirement. You can stop at any time. Sections 2, 3, 7, the feed licence's snapshot deletion duties, and this section survive. Ending access doesn't remove refunds owed under section 4.</p></section>
 <section class="card cp-sec" id="assignment"><h2>13. Assignment</h2>
 <p>We may assign these terms to a successor, including a company formed to operate Lumi Trades, without your consent. You may not assign them without ours.</p></section>
 <section class="card cp-sec" id="whole-agreement"><h2>14. Severability; entire agreement; no waiver</h2>
