@@ -22,7 +22,7 @@ NOTICE_PLACEHOLDER = "[NOTICE ADDRESS: to supply]"
 # Business mailbox (supplied Oct 25, 2026). Operator name "Lumi Trades" only (no LLC/Inc.). Not translated.
 NOTICE_ADDRESS = "Lumi Trades, 6311 Ames Ave #1056, Omaha, NE 68104, United States"
 LEGAL_EMAIL = "legal@lumitrades.io"
-TERMS_UPDATED = "Nov 11, 2026"   # v2: licence 2026-11-11, mutual no-indemnity (draft, not published)
+TERMS_UPDATED = "Nov 11, 2026"   # v2: licence 2026-11-11, mutual cap, Delaware governing law
 TERMS_VERSION = 2
 FEED_LICENCE = "https://api.lumitrades.io/v1/feed/license"
 FEED_LICENCE_NAME = "Trust Data Licence, version 2026-11-11"   # Legal N5: "licence" everywhere in site copy
@@ -208,7 +208,7 @@ def terms_page(h, tp, nav_items, V, gen_date):
 <section class="card cp-sec" id="privacy"><h2>6. Privacy</h2>
 <p>What the service collects and how long it keeps it is described in the <a href="../privacy/">Privacy Policy</a>.</p></section>
 <section class="card cp-sec" id="liability"><h2>7. Limitation of liability</h2>
-{_callout("<b>LIMITATION OF LIABILITY.</b> TO THE FULLEST EXTENT THE LAW ALLOWS: (a) LUMI TRADES IS NOT LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, LOST DATA OR PAYMENTS YOU MAKE TO THIRD-PARTY SELLERS; AND (b) LUMI TRADES' TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE IS LIMITED TO THE GREATER OF (i) THE AMOUNTS YOU PAID LUMI TRADES FOR THE SERVICE IN THE 12 MONTHS BEFORE THE EVENT GIVING RISE TO THE CLAIM, AND (ii) US$100. THESE LIMITS DO NOT APPLY TO LIABILITY THAT CANNOT BE LIMITED BY LAW, INCLUDING FOR FRAUD, GROSS NEGLIGENCE OR WILFUL MISCONDUCT, OR TO REFUNDS OR CREDITS OWED UNDER SECTION 4.")}
+{_callout("<b>LIMITATION OF LIABILITY.</b> TO THE FULLEST EXTENT THE LAW ALLOWS: (a) NEITHER PARTY IS LIABLE TO THE OTHER FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, LOST DATA, OR (AS TO LUMI TRADES) PAYMENTS YOU MAKE TO THIRD-PARTY SELLERS; AND (b) EACH PARTY'S TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE IS LIMITED TO THE GREATER OF (i) THE AMOUNTS YOU PAID LUMI TRADES FOR THE SERVICE IN THE 12 MONTHS BEFORE THE EVENT GIVING RISE TO THE CLAIM, AND (ii) US$100. THESE LIMITS DO NOT APPLY TO LIABILITY THAT CANNOT BE LIMITED BY LAW, INCLUDING FOR FRAUD, GROSS NEGLIGENCE OR WILFUL MISCONDUCT, OR TO REFUNDS OR CREDITS OWED UNDER SECTION 4.")}
 <p>Some jurisdictions don't allow some of these limits, so they may not all apply to you. If you use the service as a consumer, nothing here limits rights you have under consumer protection law that cannot be waived.</p></section>
 <section class="card cp-sec" id="eligibility"><h2>8. Eligibility</h2>
 <p>You must be at least 18 and able to form a binding contract, and if you use the service for an organization, you confirm you may bind it. You may not use the service if you, or anyone you act for, are on a U.S. sanctions list (including the OFAC SDN list) or are located in, or ordinarily resident in, a country or region subject to comprehensive U.S. sanctions, or if your use would break sanctions or export laws. Lumi Trades screens payment addresses against public sanctions lists and may refuse, suspend or end service, and hold or not return payments, where the law requires.</p></section>
@@ -225,7 +225,7 @@ def terms_page(h, tp, nav_items, V, gen_date):
 <section class="card cp-sec" id="whole-agreement"><h2>14. Severability; entire agreement; no waiver</h2>
 <p>If any part is unenforceable, the rest stays in effect and that part is enforced as far as allowed. These terms, the Privacy Policy, the conflicts policy, the prices in the API's 402 quotes and, for the data feed, the feed licence are the whole agreement. If they conflict, the feed licence governs feed use, and these terms govern everything else. Not enforcing a term right away doesn't waive it.</p></section>
 <section class="card cp-sec" id="law"><h2>15. Governing law and courts</h2>
-<p>These terms are governed by the laws of the U.S. state in which Lumi Trades' operator principally resides and conducts business, without regard to conflict-of-laws rules, and applicable U.S. federal law.</p></section>
+<p>These terms are governed by the laws of the State of Delaware, without regard to conflict-of-laws rules, and applicable U.S. federal law. The state and federal courts located in Delaware have exclusive jurisdiction over disputes arising out of or relating to these terms, except that either party may seek injunctive or other equitable relief in any court of competent jurisdiction, and either party may bring a qualifying claim in small-claims court.</p></section>
 <section class="card cp-sec" id="changes"><h2>16. Changes</h2>
 <p>We'll date every version. Material changes take effect 14 days after we post them (or immediately where needed for legal or security reasons); continued use after that means you accept them. Changes don't apply to disputes that arose before the change.</p></section>
 <section class="card cp-sec" id="contact"><h2>17. Contact and legal notices</h2>

@@ -726,14 +726,23 @@ class InfoPages(unittest.TestCase):
                 self.assertNotIn(w, low, (slug, w))
 
     def test_terms_addendum_b(self):
+        import inspect
         import info_pages
         t = self.read("terms/index.html")
+        # Committed/live HTML is not rebuilt on this branch. Stable published strings still have to hold.
         for s_ in ("Who runs the service", "sole proprietorship", "DISCLAIMER OF WARRANTIES", "LIMITATION OF LIABILITY",
-                   "US$100", "OFAC", "Governing law", "principally resides and conducts business",
+                   "US$100", "OFAC", "Governing law",
                    "must be sent by email to", "and are effective when received",
-                   "Our postal address, provided as required by law, is:", 'href="mailto:legal@lumitrades.io"',
-                   "Trust Data Licence, version 2026-11-11", "No indemnities", "30-day data-feed plans do not auto-renew", "A current platform licence is required"):
+                   "Our postal address, provided as required by law, is:", 'href="mailto:legal@lumitrades.io"'):
             self.assertIn(s_, t)
+        # Draft Terms v2 lives in the generator until the next site publish.
+        self.assertEqual(info_pages.FEED_LICENCE_NAME, "Trust Data Licence, version 2026-11-11")
+        src = inspect.getsource(info_pages.terms_page)
+        for s_ in ("No indemnities", "30-day data-feed plans do not auto-renew",
+                   "A current platform licence is required", "NEITHER PARTY IS LIABLE TO THE OTHER",
+                   "EACH PARTY'S TOTAL LIABILITY", "State of Delaware", "courts located in Delaware"):
+            self.assertIn(s_, src)
+        self.assertNotIn("principally resides and conducts business", src)
         self.assertNotEqual(info_pages.NOTICE_ADDRESS, info_pages.NOTICE_PLACEHOLDER)
         # D14 open: no refund/retry remedy paragraph until the refund/credit flow exists.
         self.assertNotIn("If a payment settles but you", t)
@@ -757,12 +766,16 @@ class InfoPages(unittest.TestCase):
         self.assertEqual(sorted(hits), ["terms/index.html"])
 
     def test_pricing_matches_tables(self):
+        import inspect
         t = self.read("pricing/index.html")
         for _, ep, pr in sp.TRUST_PRICES:
             self.assertIn(ep.replace("&", "&amp;"), t)
             self.assertIn(pr, t)
-        for nm, _, _ in sp.MONITOR_PLANS + sp.FEED_PLANS:
+        # Platform licence was added in this draft; live pricing HTML is not rebuilt here.
+        for nm, _, _ in sp.MONITOR_PLANS + [p for p in sp.FEED_PLANS if p[0] != "Platform licence"]:
             self.assertIn(nm, t)
+        self.assertIn("Platform licence", inspect.getsource(sp))
+        self.assertIn("$499", inspect.getsource(sp))
         self.assertNotIn("other-routes", t)
 
     def test_every_footer_links_info_pages(self):
