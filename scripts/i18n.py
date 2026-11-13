@@ -176,7 +176,7 @@ def switcher(L, path, langs):
         f'<li><a href="{rel(here, x.prefix + path)}" hreflang="{x.code}" lang="{x.code}" data-lang="{x.code}"'
         f'{" aria-current=\"true\"" if x.code == L.code else ""}>{html.escape(x.meta.get("name", x.code))}</a></li>' for x in langs)
     label = L.t("Language")
-    return (f'<details class="lang-menu"><summary aria-label="{html.escape(label)}: {html.escape(L.meta.get("name", ""))}">{GLOBE}'
+    return (f'<details class="lang-menu"><summary aria-label="{html.escape(L.meta.get("short", L.code.upper()))}, {html.escape(label)}: {html.escape(L.meta.get("name", ""))}">{GLOBE}'
             f'<span>{html.escape(L.meta.get("short", L.code.upper()))}</span></summary><ul>{items}</ul></details>')
 
 

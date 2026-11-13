@@ -91,7 +91,7 @@ def page(h, tp, V, gen_date, root=ROOT):
 <body class="cp tp lgw">
 <div class="bg-glow" aria-hidden="true"></div>
 <header class="cp-top"><div class="wrap cp-top-inner">
-  <a class="cp-brand" href="../"><img class="wm" src="../assets/brand/wordmark.png?v={V}" alt="Lumi" width="80" height="42"><span class="sr-only"> Trades</span></a>
+  <a class="cp-brand" href="../"><img class="wm" src="../assets/brand/wordmark-176.png?v={V}" alt="Lumi" width="80" height="42"><span class="sr-only"> Trades</span></a>
   <span class="cp-top-r"><a class="cp-dash" href="../trust/">Vendor trust list →</a>{tp.social_icons(h)}</span>
 </div></header>
 <nav class="nav" aria-label="Site"><div class="wrap nav-inner">{nav}</div></nav>

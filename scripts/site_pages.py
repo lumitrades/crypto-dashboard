@@ -856,7 +856,7 @@ def trust_page(h, tp, nav_items, V, gen_date, doc):
 <p class="hx-price-note muted">{E(_t("$0.02 buys the full report on one vendor from this list (every check, every tx hash and the signed receipts). The pay check is free for 100 checks a day: allow, warn or block for any x402 URL before your agent pays it."))}</p>
 </div>
 <div class="tx-visual ag-panel ag-feed" id="ag-feed">
-<div class="ag-head"><span class="ag-who"><img src="{R}assets/brand/logo.png?v={V}" alt="" width="30" height="30"><span><b>{E(_t("Latest delivered test-buys"))}</b><small>{E(_t("from the live trust API"))}</small></span></span><span class="ag-live"><i aria-hidden="true"></i>{E(_t("live"))}</span></div>
+<div class="ag-head"><span class="ag-who"><img src="{R}assets/brand/logo-60.png?v={V}" alt="" width="30" height="30"><span><b>{E(_t("Latest delivered test-buys"))}</b><small>{E(_t("from the live trust API"))}</small></span></span><span class="ag-live"><i aria-hidden="true"></i>{E(_t("live"))}</span></div>
 <ol class="ag-rows" id="ag-rows"><li class="sk"></li><li class="sk"></li><li class="sk"></li><li class="sk"></li></ol>
 <div class="ag-foot"><span>{E(_t("Each buy is an on-ledger payment kept with a signed receipt."))}</span><a href="#vendors">{E(_t("Full list →"))}</a></div>
 </div>

@@ -95,7 +95,7 @@ def chrome(h, pre, home, nav_items, V, path, current=None):
     """Header + nav (pre = path prefix to the site root, home = to this language's home). nav_items is ignored."""
     return (f'<body class="cp tp lgw">\n<div class="bg-glow" aria-hidden="true"></div>\n'
             f'<header class="cp-top"><div class="wrap cp-top-inner">\n'
-            f'  <a class="cp-brand" href="{home}"><img class="wm" src="{pre}assets/brand/wordmark.png?v={V}" alt="Lumi" width="80" height="42"><span class="sr-only"> Trades</span></a>\n'
+            f'  <a class="cp-brand" href="{home}"><img class="wm" src="{pre}assets/brand/wordmark-176.png?v={V}" alt="Lumi" width="80" height="42"><span class="sr-only"> Trades</span></a>\n'
             f'  <span class="cp-top-r">{h.i18n.switcher(h.L, path, h.langs)}<a class="cp-dash" href="{home}trust/">{h.E(h._("Vendor trust list →"))}</a>{social_icons(h)}</span>\n</div></header>\n'
             f'<nav class="nav" aria-label="{h.E(h._("Site"))}"><div class="wrap nav-inner">{site_nav(h, home, "", current)}</div></nav>\n')
 
