@@ -164,8 +164,10 @@
       `<td><span class="tr-conf c-${esc(conf)}">${esc(confTxt)}</span></td><td class="num">${esc(s.paid_test_buys || 0)}</td>` +
       `<td class="num">${esc(s.delivered || 0)}</td><td>${esc(fmt(lastChecked(v)))}</td><td>${ev}</td></tr>`;
   }
-  fetch(API, { headers: { Accept: "application/json" } })
-    .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  // One request per page view: assets/hero.js (the /trust/ hero feed) reuses this same promise (window.LumiVendors).
+  const load = window.LumiVendors || (window.LumiVendors = fetch(API, { cache: "no-cache", headers: { Accept: "application/json" } })
+    .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }));
+  load
     .then((d) => {
       const list = (d && d.vendors) || [];
       if (!list.length) return;

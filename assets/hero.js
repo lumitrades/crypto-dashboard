@@ -19,7 +19,8 @@
   function feed() {
     const box = $("ag-rows");
     if (!box) return;
-    j("https://api.lumitrades.io/v1/trust/vendors").then((d) => {
+    // shared with assets/trust.js on /trust/, so the vendor list is fetched once per page view
+    (window.LumiVendors || (window.LumiVendors = j("https://api.lumitrades.io/v1/trust/vendors"))).then((d) => {
       const rows = (d.vendors || []).filter((v) => { const o = v.last_paid_observation; return o && o.observed_at && o.delivery === "delivered"; })
         .sort((a, b) => b.last_paid_observation.observed_at.localeCompare(a.last_paid_observation.observed_at)).slice(0, 4);
       box.innerHTML = rows.map((v) => {
