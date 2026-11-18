@@ -624,11 +624,14 @@ def vendor_row(h, v, now_ms=None):
             f'<td>{E(h.ctime(lc)) if lc else "—"}</td><td>{ev}</td></tr>')
 
 
+NO_MONO_PRELOAD = ("how-it-works/", "privacy/", "terms/", "trust-policy/")  # no mono text in the first screen
+
+
 def _page(h, tp, path, title, desc, ld, body, V, gen_date, nav_items, current, extra_js="", keywords=None):
     up = "" if h.L.en else "../"
     R = "../" + up
     head = tp.page_head(h, title, desc, h.SITE + h.L.prefix + path, V, path, "website", ld, keywords).replace(
-        "{ASSETS}", tp.assets(h, R, V) + extra_js.replace("{R}", R).replace("{V}", V))
+        "{ASSETS}", tp.assets(h, R, V, mono=path not in NO_MONO_PRELOAD) + extra_js.replace("{R}", R).replace("{V}", V))
     return head + tp.chrome(h, R, "../", nav_items, V, path, current) + body + tp.footer(h, R, gen_date)
 
 

@@ -123,11 +123,15 @@ def extra_footer_links(h, root):
     return "".join(f' · <a href="{root}{p}">{E(_(t))}</a>' for p, t in INFO_LINKS)
 
 
-def assets(h, pre, V):
+def assets(h, pre, V, mono=True):
+    """Head links. mono=True also preloads JetBrains Mono: pages with mono text (stats, tables, code) in the first
+    screen otherwise wait for that late-discovered font before their first paint (Nov 18 2026: /trust/ first paint
+    ~0.22-0.30 s -> ~0.13 s unthrottled, Lighthouse mobile 88-89 -> 90-92). Text-only pages pass mono=False."""
     return (f'<link rel="icon" href="{pre}favicon.ico?v={V}" sizes="any">\n'
             f'<link rel="apple-touch-icon" href="{pre}assets/apple-touch-icon.png?v={V}" sizes="180x180">\n'
             f'<link rel="preload" href="{pre}assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>\n'
             f'<link rel="preload" href="{pre}assets/fonts/sora-var.woff2" as="font" type="font/woff2" crossorigin>\n'
+            + (f'<link rel="preload" href="{pre}assets/fonts/jbmono-var.woff2" as="font" type="font/woff2" crossorigin>\n' if mono else '') +
             f'<link rel="stylesheet" href="{pre}assets/style.css?v={V}">\n'
             f'<link rel="stylesheet" href="{pre}assets/glow.css?v={V}">\n'
             + h.i18n_scripts(pre))
