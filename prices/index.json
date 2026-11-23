@@ -1,8 +1,8 @@
 {
   "kind": "lumi_prices",
   "name": "Lumi Trades: x402 seller trust you can verify",
-  "as_of": "2026-11-23T08:09:50Z",
-  "as_of_ct": "Nov 23, 2026 2:09 AM CST",
+  "as_of": "2026-11-23T11:31:16Z",
+  "as_of_ct": "Nov 23, 2026 5:31 AM CST",
   "method": "Each price is copied from the live x402 402 quote of an unpaid GET to quote_url at as_of. Request quote_url yourself to see the current quote; the quote you pay against is the one that applies.",
   "intent": {
     "check a seller before paying": "https://api.lumitrades.io/v1/verdict?url=<x402 resource URL>"
@@ -81,8 +81,8 @@
           "network": "xrpl:0",
           "chain": "XRP Ledger",
           "asset": "XRP",
-          "amount": "0.0214",
-          "amount_raw": "21400",
+          "amount": "0.0213",
+          "amount_raw": "21300",
           "pay_to": "rM8kmmnz5qPMg7V3r7SHYXgDGvm8PhzLvM",
           "usd_pegged": false
         },
