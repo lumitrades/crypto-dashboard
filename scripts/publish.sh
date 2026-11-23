@@ -8,6 +8,7 @@
 #   PUBLISH_MSG="custom message" scripts/publish.sh
 # Steps (git pull/push bounded by GIT_NET_TIMEOUT, default 120 s): take state/lock -> git pull --rebase --autostash -> (data paths: scripts/privacy.py, scripts/build_pages.py) -> validate JSON -> git add -> commit only if changed -> push
 #   -> (every publish, before the build: scripts/derive_attempts_all.py -> scripts/trust_attempts.json)
+#   -> (page-building publishes, before the build: scripts/prices_snapshot.py --refresh -> prices/index.json)
 #   -> IndexNow ping (scripts/indexnow_ping.py: one POST with the sitemap URLs whose files changed in the pushed commit; INDEXNOW=0 skips; a failed ping never fails the publish).
 # Exit codes: 0 ok / nothing to publish, 2 invalid JSON, 3 lock timeout, 4 privacy scrub failed, 5 page build failed
 # with nothing else to publish (e.g. live API fetch incomplete), other = git failure.
@@ -53,6 +54,18 @@ if [ -f scripts/derive_attempts_all.py ]; then
     while IFS= read -r p; do [ -n "$p" ] && paths+=("$p"); done <<< "$att"
   else
     echo "publish: WARNING derive_attempts_all.py failed; keeping scripts/trust_attempts.json" >&2
+  fi
+fi
+
+# Page-building publishes also refresh prices/index.json (the /prices/ page) from the live 402 quotes (unpaid GETs,
+# never a payment): scripts/prices_snapshot.py --refresh rewrites it only when a quoted amount or payTo changed and
+# refuses (exit 1) on a non-402 answer or a USD price that disagrees with the site table; a failure only warns and
+# keeps the existing snapshot. (Nov 23, 2026: until then /prices/ kept its Oct 29 snapshot.)
+if [ "${BUILD_PAGES:-1}" != 0 ] && [ -f scripts/prices_snapshot.py ] && printf '%s\n' "${paths[@]}" | grep -q '^data\(/\|$\)'; then
+  if pr=$(timeout -k 5 90 python3 scripts/prices_snapshot.py --refresh); then
+    while IFS= read -r p; do [ -n "$p" ] && paths+=("$p"); done <<< "$pr"
+  else
+    echo "publish: WARNING prices_snapshot.py --refresh failed; keeping prices/index.json" >&2
   fi
 fi
 

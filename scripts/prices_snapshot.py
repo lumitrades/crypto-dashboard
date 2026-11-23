@@ -7,6 +7,13 @@ USD-pegged amount differs from the site's price table (site_pages.TRUST_PRICES):
 live 402 does not quote.
   python3 scripts/prices_snapshot.py            # write prices/index.json
   python3 scripts/prices_snapshot.py --check    # compare the checked-in snapshot with the live quotes, write nothing
+  python3 scripts/prices_snapshot.py --refresh  # publish.sh: rewrite only if a quote changed; prints the path if written
+
+--refresh (Nov 23, 2026) keeps /prices/ current: until then the snapshot was only rewritten by hand, so the page said
+"checked Oct 29" and showed Oct 29 XRP amounts for weeks. publish.sh runs it before every page build. It rewrites the
+file only when an amount, asset, chain or payTo in a live quote differs from the snapshot (XRP moves with the XRP/USD
+rate, so in practice about once a day), and never on a USD-pegged mismatch with the site table or a non-402 answer:
+those exit 1 and the old snapshot stays (publish.sh only warns).
 """
 import datetime as dt, json, os, sys, urllib.request
 from zoneinfo import ZoneInfo
@@ -101,17 +108,46 @@ def snapshot():
     }
 
 
+def _sans_time(d):
+    """The snapshot minus its timestamp: every route, price, accepted amount, asset, chain, payTo and note."""
+    return {k: v for k, v in d.items() if k not in ("as_of", "as_of_ct")}
+
+
+def write(snap, out=None):
+    out = out or OUT
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out + ".tmp", "w", encoding="utf-8") as f:
+        json.dump(snap, f, indent=2)
+        f.write("\n")
+    os.replace(out + ".tmp", out)
+
+
+def refresh(snap, out=None):
+    """Write snap only if something other than the timestamp changed (keeps as_of, the page and the commit from
+    churning). Returns True if the file was written."""
+    out = out or OUT
+    try:
+        with open(out, encoding="utf-8") as f:
+            old = json.load(f)
+    except (OSError, ValueError):
+        old = {}
+    if old and _sans_time(old) == _sans_time(snap):
+        return False
+    write(snap, out)
+    return True
+
+
 if __name__ == "__main__":
     snap = snapshot()
-    if "--check" in sys.argv:
+    if "--refresh" in sys.argv:
+        if refresh(snap):
+            print(os.path.relpath(OUT, ROOT))
+    elif "--check" in sys.argv:
         old = json.load(open(OUT))
         strip = lambda d: [(p["endpoint"], p["price_usd"], [(o["network"], o["asset"], o["amount"], o["pay_to"]) for o in p["accepts"] if o["usd_pegged"]]) for p in d["paid"]]
         if strip(old) != strip(snap):
             raise SystemExit("prices_snapshot: prices/index.json no longer matches the live 402 quotes; rerun without --check")
         print("prices_snapshot: snapshot matches the live 402 quotes (USD-pegged assets)")
     else:
-        os.makedirs(os.path.dirname(OUT), exist_ok=True)
-        with open(OUT, "w", encoding="utf-8") as f:
-            json.dump(snap, f, indent=2)
-            f.write("\n")
+        write(snap)
         print(f"prices_snapshot: wrote {os.path.relpath(OUT, ROOT)} (as of {snap['as_of_ct']})")

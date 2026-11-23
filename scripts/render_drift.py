@@ -21,6 +21,7 @@ EXCLUDE = [
     "*.json", "scripts/test_*", "scripts/top_sellers_refresh.py", "scripts/publish.sh", "scripts/indexnow_ping.py",
     "scripts/derive_attempts_all.py", "scripts/privacy.py", "scripts/track_trades.py", "scripts/locked.sh",
     "scripts/check_well_known_x402.py", "scripts/build_site.py", "scripts/render_drift.py",
+    "scripts/prices_snapshot.py",   # writes the prices/index.json data snapshot (Nov 23, 2026); never renders a page
 ]
 MARKER = "index.html"
 

@@ -1,8 +1,8 @@
 {
   "kind": "lumi_prices",
   "name": "Lumi Trades: x402 seller trust you can verify",
-  "as_of": "2026-10-29T16:50:39Z",
-  "as_of_ct": "Oct 29, 2026 11:50 AM CDT",
+  "as_of": "2026-11-23T08:09:50Z",
+  "as_of_ct": "Nov 23, 2026 2:09 AM CST",
   "method": "Each price is copied from the live x402 402 quote of an unpaid GET to quote_url at as_of. Request quote_url yourself to see the current quote; the quote you pay against is the one that applies.",
   "intent": {
     "check a seller before paying": "https://api.lumitrades.io/v1/verdict?url=<x402 resource URL>"
@@ -27,8 +27,8 @@
           "network": "xrpl:0",
           "chain": "XRP Ledger",
           "asset": "XRP",
-          "amount": "0.0078",
-          "amount_raw": "7800",
+          "amount": "0.0107",
+          "amount_raw": "10700",
           "pay_to": "rM8kmmnz5qPMg7V3r7SHYXgDGvm8PhzLvM",
           "usd_pegged": false
         },
@@ -81,8 +81,8 @@
           "network": "xrpl:0",
           "chain": "XRP Ledger",
           "asset": "XRP",
-          "amount": "0.0155",
-          "amount_raw": "15500",
+          "amount": "0.0214",
+          "amount_raw": "21400",
           "pay_to": "rM8kmmnz5qPMg7V3r7SHYXgDGvm8PhzLvM",
           "usd_pegged": false
         },
@@ -135,8 +135,8 @@
           "network": "xrpl:0",
           "chain": "XRP Ledger",
           "asset": "XRP",
-          "amount": "0.0039",
-          "amount_raw": "3900",
+          "amount": "0.0054",
+          "amount_raw": "5400",
           "pay_to": "rM8kmmnz5qPMg7V3r7SHYXgDGvm8PhzLvM",
           "usd_pegged": false
         },
@@ -189,8 +189,8 @@
           "network": "xrpl:0",
           "chain": "XRP Ledger",
           "asset": "XRP",
-          "amount": "0.0062",
-          "amount_raw": "6200",
+          "amount": "0.0086",
+          "amount_raw": "8600",
           "pay_to": "rM8kmmnz5qPMg7V3r7SHYXgDGvm8PhzLvM",
           "usd_pegged": false
         },
