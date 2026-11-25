@@ -92,8 +92,10 @@ def pricing_page(h, tp, nav_items, V, gen_date):
 
 # ---------- /prices/ (machine-readable price and proof page) ----------
 PRICES_TITLE = "Prices and proof: x402 seller checks | Lumi Trades"
+# Every $ amount and product named here must be a paid route in prices/index.json (test_site_pages checks the
+# amounts). Nov 25, 2026: dropped "a quote check" at $0.02 (no such paid route since PP-042 made the check free).
 PRICES_DESC = ("Lumi Trades prices, copied from the live x402 quotes and dated: $0.01 to check a seller before "
-               "paying, $0.02 for a quote check or seller report. JSON too.")   # <=155 chars, no "&" or quotes
+               "paying, $0.02 for a seller report. JSON too.")   # <=155 chars, no "&" or quotes
 PRICES_JSON = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "prices", "index.json")
 
 

@@ -43,6 +43,20 @@ class SitePages(unittest.TestCase):
         self.assertIn("/v1/check/wallets", snap["proof"]["test_buy_wallets"])
         self.assertNotRegex(json.dumps(snap).lower(), r"solana|partner|scam")
 
+    def test_prices_description_matches_paid_routes(self):
+        """The /prices/ meta + JSON-LD description names only real paid prices (Nov 25, 2026: it still sold a $0.02
+        'quote check' that PP-042 made free on Oct 29)."""
+        import re
+        import info_pages
+        with open(os.path.join(ROOT, "prices", "index.json"), encoding="utf-8") as f:
+            snap = json.load(f)
+        prices = {"$" + p["price_usd"] for p in snap["paid"]}
+        desc = info_pages.PRICES_DESC
+        self.assertLessEqual(len(desc), 155)
+        for amt in re.findall(r"\$\d+(?:\.\d+)?", desc):
+            self.assertIn(amt, prices, desc)
+        self.assertNotIn("quote check", desc.lower())
+
     def test_prices_page_and_llms_routing(self):
         with open(os.path.join(ROOT, "prices", "index.html"), encoding="utf-8") as f:
             page = f.read()
