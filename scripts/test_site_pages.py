@@ -609,7 +609,22 @@ class TopSellersPage(unittest.TestCase):
             self.assertIn(f"<loc>https://lumitrades.io/{lang}top-sellers/</loc>", sm)
             with open(os.path.join(ROOT, lang, "top-sellers", "index.html"), encoding="utf-8") as f:
                 h = f.read()
-            self.assertEqual(h.count("https://api.lumitrades.io/trust/v/"), n + h.count('"url": "https://api.lumitrades.io/trust/v/'), lang)
+            # one results link per row: the on-site seller page when it exists (same links as /trust/), else the API page
+            hrefs = re.findall(r'<td><a href="([^"]+)"[^>]*>[^<]+</a></td></tr>', h)
+            self.assertEqual(len(hrefs), n, lang)
+            blocks = []
+            for m in re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S):
+                d = json.loads(m)
+                blocks += d if isinstance(d, list) else [d]
+            ld = [x["url"] for x in next(b for b in blocks if b.get("@type") == "CollectionPage")["mainEntity"]["itemListElement"]]
+            self.assertEqual(len(ld), n, lang)
+            for a, u in zip(hrefs, ld):
+                if a.startswith("https://api.lumitrades.io/trust/v/"):
+                    self.assertEqual(a, u)
+                else:
+                    self.assertEqual(a, ("../" if lang == "" else "../../") + u.split("https://lumitrades.io/", 1)[1], lang)
+                    self.assertRegex(u, r"^https://lumitrades\.io/sellers/[a-z0-9-]+/$")
+                    self.assertTrue(os.path.isfile(os.path.join(ROOT, u.split("https://lumitrades.io/", 1)[1], "index.html")), u)
             self.assertIn('href="../trust-policy/"', h)
             self.assertNotRegex(h.lower(), r"\bscam|p&amp;l|not delivered|\{(n|m|days|mail|policy)\}")
             with open(os.path.join(ROOT, lang, "trust", "index.html"), encoding="utf-8") as f:

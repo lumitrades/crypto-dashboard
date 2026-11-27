@@ -117,6 +117,21 @@ def rows(snap=None, now=None):
     return {c: r for c, r in out.items() if r}
 
 
+def seller_link(h, key, api_url):
+    """(href for the table, absolute url for JSON-LD). Sellers on the curated trust list have an on-site page
+    /sellers/<slug>/ (site_pages.SELLER_SLUGS, set by build_pages.py; the same links /trust/ uses); others keep the
+    API result page. Both show the same stored results; the seller page links on to the API page."""
+    try:
+        import site_pages
+        slug = site_pages.SELLER_SLUGS.get(str(key or ""))
+    except Exception:
+        slug = None
+    if not slug:
+        return api_url, api_url
+    rel = site_pages.seller_href(h, key)
+    return rel, f"{h.SITE.rstrip('/')}/sellers/{slug}/"
+
+
 def lastmod():
     g = load().get("generated_at")
     return g[:10] if g else None
@@ -135,6 +150,9 @@ def build_page(h, tp, nav_items, V, gen_date, page):
     E, _t = h.E, h._
     snap = load()
     cats = rows(snap)
+    for rs in cats.values():  # internal link: a seller with its own /sellers/<slug>/ page links there, else the API result page
+        for r in rs:
+            r["href"], r["url"] = seller_link(h, r["key"], r["url"])
     title, desc, h1 = _t(TITLE), _t(DESC), _t(H1)
     url = h.SITE + h.L.prefix + SLUG
     items, pos = [], 0
@@ -163,7 +181,7 @@ def build_page(h, tp, nav_items, V, gen_date, page):
             f'<tr><td>{E(r["name"])}' + (f'<br><span class="meta mono">{E(r["host"])}</span>' if r["host"] != r["name"] else "") + "</td>"
             f'<td>{E(", ".join(r["chains"]))}</td><td>{E(day(r["last"]))}</td>'
             f'<td>{E(_t(L_OF, d=r["delivered"], n=r["window"]))}</td>'
-            f'<td><a href="{E(r["url"])}" rel="noopener">{E(_t(L_VIEW))}</a></td></tr>' for r in rs)
+            f'<td><a href="{E(r["href"])}"' + ("" if r["href"] != r["url"] else ' rel="noopener"') + f'>{E(_t(L_VIEW))}</a></td></tr>' for r in rs)
         secs += (f'<section class="card cp-sec" id="{c}"><h2>{E(_t(CAT_LABEL[c]))}</h2>'
                  f'<p class="meta">{E(_t(L_COUNT, n=len(rs)))}</p>'
                  f'<div class="cp-tablewrap"><table class="cp-table cp-stack cp-stack-r"><thead><tr><th>{E(_t(L_SELLER))}</th><th>{E(_t(L_CHAINS))}</th>'
